@@ -51,7 +51,7 @@ cat <<EOF
   Installed: $DEST
 
   A 🙈 should now be sitting in your menu bar.
-  Cover WeChat right away:  click 🙈 → "Cover 绿色泡泡 now"
+  Cover it right away:      click 🙈 → "Cover 绿色泡泡 now"
   Turn it off completely:   click 🙈 → "Quit WC PeekGuard…"
 
   Tip: add it under System Settings → General → Login Items if you want it
