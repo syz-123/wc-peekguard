@@ -1,0 +1,16 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build + self-test
+        run: |
+          chmod +x build.sh
+          ./build.sh 0.0.0 "${{ github.run_number }}"

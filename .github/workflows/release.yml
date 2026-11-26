@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build, e.g. 1.0.0"
+        required: true
+        default: "1.0.0"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: v
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "build=${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+
+      - name: Build universal app + self-test
+        run: |
+          chmod +x build.sh install.sh
+          ./build.sh "${{ steps.v.outputs.version }}" "${{ steps.v.outputs.build }}"
+
+      - name: Use a stable asset name for the one-line installer
+        run: cp "dist/WeChatPrivacy-${{ steps.v.outputs.version }}.zip" dist/WeChatPrivacy.zip
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${{ steps.v.outputs.version }}"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            # The release may already exist (e.g. published from a local build).
+            gh release upload "$TAG" dist/WeChatPrivacy.zip --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" \
+              dist/WeChatPrivacy.zip \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$TAG" \
+              --generate-notes
+          fi
