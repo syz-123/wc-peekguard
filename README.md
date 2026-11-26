@@ -96,7 +96,7 @@ curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.s
 ### 方式二：下载安装包（不想碰终端就走这条）
 
 1. 到 [Releases](https://github.com/syz-123/wc-peekguard/releases/latest) 下载 `WCPeekGuard.zip`
-2. 双击解压，把 `WC Peek Guard.app` 拖进「应用程序」
+2. 双击解压，把 `WC PeekGuard.app` 拖进「应用程序」
 3. **右键点它 → 打开**（第一次必须右键，双击一定会被拦住）
 
 > **为什么会被拦**：这个 App 没有 Apple 的付费签名，macOS 对从网上下载的这类应用默认拒绝，会提示"无法验证开发者"。**这是正常的，不是病毒。** 右键打开一次之后，系统就记住了。

@@ -62,7 +62,7 @@ curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.s
 
 ```
 :: downloading the latest release
-:: installing to /Users/你的名字/Applications/WC Peek Guard.app
+:: installing to /Users/你的名字/Applications/WC PeekGuard.app
 :: launching
   Installed: ...
 ```
@@ -84,7 +84,7 @@ curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.s
 
 **第 2 步：解压、放好**
 
-双击下载好的压缩包，会解出一个 `WC Peek Guard.app`。
+双击下载好的压缩包，会解出一个 `WC PeekGuard.app`。
 
 把它拖进「应用程序」文件夹（在 Finder 左侧边栏能看见）。
 
@@ -107,7 +107,7 @@ curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.s
 | 看哪里 | 应该看到 |
 | --- | --- |
 | 屏幕右上角菜单栏 | 多了一个 🙈（可能在其他图标旁边，仔细找） |
-| 点一下 🙈 | 弹出菜单：`Cover 绿色泡泡 now`、`About WC Peek Guard…`、`Quit WC Peek Guard…` |
+| 点一下 🙈 | 弹出菜单：`Cover 绿色泡泡 now`、`About WC PeekGuard…`、`Quit WC PeekGuard…` |
 | Dock（屏幕最下方） | **什么都没有**——它是菜单栏应用，不占 Dock，这是正常的 |
 
 三个都对，就装好了。
@@ -183,10 +183,10 @@ curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.s
 
 ## 八、怎么关掉、怎么删干净
 
-**临时关掉**：点菜单栏 🙈 → `Quit WC Peek Guard…` → 按指纹确认。
+**临时关掉**：点菜单栏 🙈 → `Quit WC PeekGuard…` → 按指纹确认。
 （要指纹，是防止别人趁你不在顺手关掉它。）
 
-**彻底删除**：上面退出之后，把「应用程序」里的 `WC Peek Guard.app` 拖进废纸篓。就完了。
+**彻底删除**：上面退出之后，把「应用程序」里的 `WC PeekGuard.app` 拖进废纸篓。就完了。
 
 它**不写任何配置文件、不装开机自启、不在系统里留东西**，删掉就是干净删掉。
 
