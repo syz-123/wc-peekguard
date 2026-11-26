@@ -1,0 +1,85 @@
+name: Gatekeeper QA
+
+# Manual only. Answers one question on a clean macOS runner:
+# a stranger downloads the zip in a browser, gets a quarantine flag, and
+# double-clicks — what does macOS actually decide?
+on:
+  workflow_dispatch:
+
+jobs:
+  gatekeeper:
+    runs-on: macos-latest
+    steps:
+      - name: Environment
+        run: |
+          echo "macOS: $(sw_vers -productVersion) ($(sw_vers -buildVersion))"
+          echo "arch : $(uname -m)"
+
+      - name: Download the release asset like a browser would
+        run: |
+          curl -fsSL -o /tmp/WCPeekGuard.zip \
+            https://github.com/syz-123/wc-peekguard/releases/latest/download/WCPeekGuard.zip
+          ls -l /tmp/WCPeekGuard.zip
+
+      - name: Stamp the quarantine flag (what Safari adds, curl does not)
+        run: |
+          xattr -w com.apple.quarantine "0083;$(printf '%x' "$(date +%s)");Safari;" /tmp/WCPeekGuard.zip
+          echo "quarantine on zip:"; xattr -p com.apple.quarantine /tmp/WCPeekGuard.zip
+
+      - name: Unpack
+        run: |
+          mkdir -p /tmp/out
+          ditto -x -k /tmp/WCPeekGuard.zip /tmp/out
+          ls -b /tmp/out
+
+      - name: Propagate quarantine to the app (simulates Archive Utility)
+        run: |
+          APP="/tmp/out/WC Peek Guard.app"
+          xattr -w com.apple.quarantine "0083;$(printf '%x' "$(date +%s)");Safari;" "$APP"
+          echo "quarantine on app:"; xattr -p com.apple.quarantine "$APP"
+
+      - name: "VERDICT 1: Gatekeeper assessment with quarantine"
+        run: |
+          APP="/tmp/out/WC Peek Guard.app"
+          echo "--- spctl (this is the authoritative Gatekeeper decision) ---"
+          spctl --assess --type execute --verbose=4 "$APP" 2>&1 || echo "exit=$?"
+          echo
+          echo "--- codesign ---"
+          codesign -dv --verbose=4 "$APP" 2>&1 || true
+
+      - name: Try to launch it while quarantined
+        run: |
+          APP="/tmp/out/WC Peek Guard.app"
+          echo "launching while quarantined..."
+          open "$APP" 2>&1 || echo "open failed with exit=$?"
+          sleep 3
+          if pgrep -x WCPeekGuard >/dev/null; then
+            echo "RESULT: process started"
+            killall WCPeekGuard || true
+          else
+            echo "RESULT: process did NOT start (blocked by Gatekeeper)"
+          fi
+
+      - name: "VERDICT 2: same app after the installer strips quarantine"
+        run: |
+          APP="/tmp/out/WC Peek Guard.app"
+          xattr -dr com.apple.quarantine "$APP"
+          echo "quarantine now:"; xattr -p com.apple.quarantine "$APP" 2>/dev/null || echo "(none)"
+          echo "--- spctl still rejects? ---"
+          spctl --assess --type execute --verbose=4 "$APP" 2>&1 || echo "exit=$?"
+          echo "--- but does it launch? ---"
+          open "$APP" 2>&1 || echo "open failed with exit=$?"
+          sleep 3
+          if pgrep -x WCPeekGuard >/dev/null; then
+            echo "RESULT: process started (launch gate is quarantine-only)"
+            killall WCPeekGuard || true
+          else
+            echo "RESULT: process did NOT start"
+          fi
+
+      - name: Integrity after the round trip
+        run: |
+          APP="/tmp/out/WC Peek Guard.app"
+          codesign --verify --deep --strict "$APP" && echo "signature OK"
+          "$APP/Contents/MacOS/WCPeekGuard" --self-test
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP/Contents/Info.plist"
