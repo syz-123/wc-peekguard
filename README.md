@@ -13,6 +13,7 @@
 <img src="https://img.shields.io/badge/license-MIT-3b82f6" alt="MIT">
 <img src="https://img.shields.io/badge/network-none-16a34a" alt="No network">
 <img src="https://img.shields.io/badge/permissions-none-16a34a" alt="No permissions">
+<img src="https://github.com/syz-123/wechat-privacy/actions/workflows/build.yml/badge.svg" alt="Build">
 
 [安装](#安装) · [它怎么工作](#它怎么工作) · [隐私账本](#隐私账本它到底要什么权限) · [它不做什么](#它不做什么) · [FAQ](#faq)
 
