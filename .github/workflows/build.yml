@@ -14,3 +14,6 @@ jobs:
         run: |
           chmod +x build.sh
           ./build.sh 0.0.0 "${{ github.run_number }}"
+
+      - name: Consistency self-check
+        run: python3 tools/selfcheck.py

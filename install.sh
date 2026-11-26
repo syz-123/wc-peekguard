@@ -25,23 +25,31 @@ fi
 say ":: downloading the latest release"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-curl -fsSL --retry 3 "$URL" -o "$TMP/WCPeekGuard.zip" \
-  || fail "download failed — check your network, or grab the zip from https://github.com/$REPO/releases"
+# Timeouts matter: without them a blocked connection hangs silently for minutes.
+curl -fsSL --connect-timeout 15 --max-time 300 --retry 2 --retry-delay 2 \
+  "$URL" -o "$TMP/WCPeekGuard.zip" \
+  || fail "download failed. If this network cannot reach GitHub, download WCPeekGuard.zip
+  from https://github.com/$REPO/releases and install it by hand."
 
 say ":: unpacking"
 ditto -x -k "$TMP/WCPeekGuard.zip" "$TMP/out" || fail "could not unpack the archive"
 [[ -d "$TMP/out/$APP_NAME" ]] || fail "archive layout looks wrong, aborting"
 
+# Verify before touching the destination: never install a bundle we cannot validate.
+if command -v codesign >/dev/null 2>&1; then
+  say ":: verifying signature"
+  codesign --verify --deep --strict "$TMP/out/$APP_NAME" 2>/dev/null \
+    || fail "the downloaded app failed signature verification. Delete it and try again."
+fi
+
 say ":: installing to $DEST"
 killall WCPeekGuard 2>/dev/null || true
 mkdir -p "$DEST_DIR"
 rm -rf "$DEST"
-ditto "$TMP/out/$APP_NAME" "$DEST"
+ditto "$TMP/out/$APP_NAME" "$DEST" || fail "could not write to $DEST_DIR — check disk space and permissions."
 
 # The build is ad-hoc signed, so macOS would otherwise refuse to launch it.
 xattr -dr com.apple.quarantine "$DEST" 2>/dev/null || true
-codesign --verify --deep --strict "$DEST" 2>/dev/null \
-  || say "   (signature check skipped — the app will still run)"
 
 say ":: launching"
 open "$DEST"

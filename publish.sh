@@ -68,22 +68,17 @@ for f in README.md install.sh; do
 done
 grep -rn '__OWNER__' . --include='*.md' --include='*.sh' 2>/dev/null | head -3 || true
 
-# ---------------------------------------------------------------- preflight
-# Nothing local may leak into a public repo. See AGENTS.md section 8.
-say "preflight  personal-information scan"
-LEAK="$(grep -rn "/Users/[a-zA-Z]" --include="*.md" --include="*.swift" --include="*.sh" --include="*.yml" . 2>/dev/null \
-        | grep -v "^\./AGENTS.md" || true)"
-if [[ -n "$LEAK" ]]; then
-  printf '%s\n' "$LEAK"
-  die "local paths would be published — clean them up first (AGENTS.md §8)"
-fi
-note "clean: no local paths in publishable files"
-
 # ---------------------------------------------------------------- 4. build
 say "4/6  building"
 chmod +x build.sh install.sh
 ./build.sh "$VERSION" "$BUILD_NUMBER" >/dev/null
 note "built dist/WCPeekGuard-$VERSION.zip"
+
+# ---------------------------------------------------------------- preflight
+# Runs after the build so it can inspect the artifact too. Also blocks on
+# personal paths leaking into a public repo (AGENTS.md section 8).
+say "preflight  consistency + personal-information scan"
+python3 tools/selfcheck.py || die "self-check failed — fix the items above before publishing"
 
 # ---------------------------------------------------------------- 5. commit
 say "5/6  creating the repository and pushing"

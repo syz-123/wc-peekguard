@@ -91,7 +91,7 @@ curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.s
 
 不需要 sudo、不需要密码、不需要装 Xcode，装完自动启动。
 
-它做的事就四件：**下载 → 解压 → 放进 `~/Applications` → 去掉 macOS 的隔离标记 → 打开。** 不放心可以先读 [install.sh](install.sh)，六十行，没有别的动作。
+它做的事就四件：**下载 → 解压 → 放进 `~/Applications` → 去掉 macOS 的隔离标记 → 打开。** 不放心可以先读 [install.sh](install.sh)，不到七十行，没有别的动作。
 
 ### 方式二：下载安装包（不想碰终端就走这条）
 
