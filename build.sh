@@ -12,11 +12,14 @@ VERSION="${1:-1.0.0}"
 BUILD="${2:-10}"
 MIN_MACOS="14.0"
 DIST="dist"
-APP="$DIST/WC PeekGuard.app"
 CACHE="/tmp/wc-peekguard-module-cache"
-STAGE="/tmp/wc-peekguard-stage"
+# Build outside the synced/Documents tree: Finder and iCloud re-apply
+# com.apple.FinderInfo to bundle directories here, which makes codesign
+# refuse the bundle as "resource fork, Finder information, or similar detritus".
+STAGE="$(mktemp -d /tmp/wc-peekguard-stage.XXXXXX)"
+APP="$STAGE/WC PeekGuard.app"
 
-rm -rf "$DIST" "$STAGE"
+rm -rf "$DIST"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$STAGE/SeeNoEvil.iconset"
 
 echo "==> compiling (swiftc, universal)"
@@ -74,7 +77,6 @@ info = {
 PLIST
 
 echo "==> signing (ad-hoc)"
-# Finder/iCloud metadata blocks codesign; strip it before sealing the bundle.
 find "$APP" -name '.DS_Store' -delete 2>/dev/null || true
 xattr -cr "$APP"
 codesign --force --deep --sign - "$APP"
@@ -84,7 +86,10 @@ echo "==> self-test"
 "$APP/Contents/MacOS/WCPeekGuard" --self-test
 
 echo "==> zipping"
-ditto -c -k --sequesterRsrc --keepParent "$APP" "$DIST/WCPeekGuard-$VERSION.zip"
+mkdir -p "$DIST"
+ditto -c -k --norsrc --noextattr --keepParent "$APP" "$DIST/WCPeekGuard-$VERSION.zip"
+# A convenience copy for local double-click testing; strip xattrs on the way out.
+ditto --norsrc --noextattr "$APP" "$DIST/WC PeekGuard.app"
 
 lipo -info "$APP/Contents/MacOS/WCPeekGuard"
 du -sh "$DIST/WCPeekGuard-$VERSION.zip"

@@ -370,7 +370,7 @@ struct CoverView: View {
             if let auth = privacy.embeddedContext, privacy.authenticationPanelID == panelID {
                 EmbeddedFingerprint(auth: auth) { privacy.embeddedViewReady(auth) }
                     .id(ObjectIdentifier(auth)).frame(width: 64, height: 64)
-                    .accessibilityLabel("Rest your finger on Touch ID to reveal WeChat")
+                    .accessibilityLabel("Rest your finger on Touch ID to reveal 绿色泡泡")
             } else {
                 Button { privacy.unlock() } label: {
                     Image(systemName: "touchid").font(.system(size: 29)).padding(12)
@@ -406,8 +406,8 @@ func selfTest() {
     precondition(prompt.claim())
     for _ in 0..<100 { precondition(!prompt.claim()) }
     prompt.leaveForAnotherApp(); precondition(prompt.claim()); precondition(!prompt.claim())
-    print("PASS: 15-second deadline; WeChat activity resets deadline; other-app activity does not")
-    print("PASS: active WeChat uses overlay; background hides inactive target; authentication retains cover")
+    print("PASS: 15-second deadline; the green bubble resets the deadline; other-app activity does not")
+    print("PASS: active green bubble uses overlay; background hides inactive target; authentication retains cover")
     print("PASS: one automatic prompt per visit; cancellation cannot cause repeated polling prompts; returning allows another prompt")
 }
 if CommandLine.arguments.contains("--self-test") { selfTest(); exit(0) }
