@@ -1,10 +1,10 @@
 #!/bin/zsh
-# Builds WeChat Privacy as a universal (arm64 + x86_64) macOS app.
+# Builds WC PeekGuard as a universal (arm64 + x86_64) macOS app.
 #
 #   ./build.sh                # 1.0.0 (build 10)
 #   ./build.sh 1.2.0 12       # custom version / build number
 #
-# Output: dist/WeChat Privacy.app  and  dist/WeChatPrivacy-<version>.zip
+# Output: dist/WC PeekGuard.app  and  dist/WCPeekGuard-<version>.zip
 set -eu
 cd "${0:A:h}"
 
@@ -12,9 +12,9 @@ VERSION="${1:-1.0.0}"
 BUILD="${2:-10}"
 MIN_MACOS="14.0"
 DIST="dist"
-APP="$DIST/WeChat Privacy.app"
-CACHE="/tmp/wechat-privacy-module-cache"
-STAGE="/tmp/wechat-privacy-stage"
+APP="$DIST/WC PeekGuard.app"
+CACHE="/tmp/wc-peekguard-module-cache"
+STAGE="/tmp/wc-peekguard-stage"
 
 rm -rf "$DIST" "$STAGE"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$STAGE/SeeNoEvil.iconset"
@@ -24,13 +24,13 @@ for arch in arm64 x86_64; do
   xcrun swiftc -swift-version 5 -O \
     -target "${arch}-apple-macos${MIN_MACOS}" \
     -module-cache-path "$CACHE" \
-    Sources/WeChatPrivacy.swift \
-    -o "$STAGE/WeChatPrivacy-$arch" \
+    Sources/WCPeekGuard.swift \
+    -o "$STAGE/WCPeekGuard-$arch" \
     -framework AppKit -framework SwiftUI -framework LocalAuthentication \
     -framework LocalAuthenticationEmbeddedUI -framework CoreGraphics
 done
-lipo -create -output "$APP/Contents/MacOS/WeChatPrivacy" \
-  "$STAGE/WeChatPrivacy-arm64" "$STAGE/WeChatPrivacy-x86_64"
+lipo -create -output "$APP/Contents/MacOS/WCPeekGuard" \
+  "$STAGE/WCPeekGuard-arm64" "$STAGE/WCPeekGuard-x86_64"
 
 echo "==> rendering app icon"
 xcrun swift -module-cache-path "$CACHE" tools/make-icon.swift "$STAGE/SeeNoEvil.iconset"
@@ -58,10 +58,10 @@ import plistlib, sys
 from pathlib import Path
 app, version, build, minimum = Path(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4]
 info = {
-    'CFBundleIdentifier': 'local.wechat.privacy',
-    'CFBundleName': 'WeChat Privacy',
-    'CFBundleDisplayName': 'WeChat Privacy',
-    'CFBundleExecutable': 'WeChatPrivacy',
+    'CFBundleIdentifier': 'local.wc.peekguard',
+    'CFBundleName': 'WC PeekGuard',
+    'CFBundleDisplayName': 'WC PeekGuard',
+    'CFBundleExecutable': 'WCPeekGuard',
     'CFBundlePackageType': 'APPL',
     'CFBundleShortVersionString': version,
     'CFBundleVersion': build,
@@ -81,11 +81,11 @@ codesign --force --deep --sign - "$APP"
 codesign --verify --deep --strict "$APP"
 
 echo "==> self-test"
-"$APP/Contents/MacOS/WeChatPrivacy" --self-test
+"$APP/Contents/MacOS/WCPeekGuard" --self-test
 
 echo "==> zipping"
-ditto -c -k --sequesterRsrc --keepParent "$APP" "$DIST/WeChatPrivacy-$VERSION.zip"
+ditto -c -k --sequesterRsrc --keepParent "$APP" "$DIST/WCPeekGuard-$VERSION.zip"
 
-lipo -info "$APP/Contents/MacOS/WeChatPrivacy"
-du -sh "$DIST/WeChatPrivacy-$VERSION.zip"
-echo "==> done: $DIST/WeChatPrivacy-$VERSION.zip"
+lipo -info "$APP/Contents/MacOS/WCPeekGuard"
+du -sh "$DIST/WCPeekGuard-$VERSION.zip"
+echo "==> done: $DIST/WCPeekGuard-$VERSION.zip"

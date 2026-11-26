@@ -129,7 +129,7 @@ struct TargetWindow {
     }
     func makePanel(id: Int) -> CoverPanel {
         let panel = CoverPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
-        panel.title = "WeChat Privacy"
+        panel.title = "WC PeekGuard"
         panel.isReleasedWhenClosed = false
         panel.isRestorable = false
         panel.isMovable = false
@@ -266,7 +266,7 @@ struct TargetWindow {
                 return
             }
             if embedded, let id = self.authenticationPanelID { self.panels[id]?.makeKey() }
-            auth.evaluatePolicy(policy, localizedReason: "Reveal WeChat behind your privacy cover.") { [weak self] success, _ in
+            auth.evaluatePolicy(policy, localizedReason: "Reveal 绿色泡泡 behind your privacy cover.") { [weak self] success, _ in
                 Task { @MainActor in
                     guard let self = self, self.generation == token else { return }
                     self.authenticating = false; self.context = nil; self.embeddedContext = nil
@@ -304,8 +304,8 @@ struct TargetWindow {
             presentPanels(prompt: true)
         } else {
             let alert = NSAlert()
-            alert.messageText = "🙈 WeChat Privacy"
-            alert.informativeText = "WeChat is covered after 15 seconds without interaction. Touch ID appears automatically when you return. Quit this app to turn protection off; open WeChat Privacy from Applications to turn it back on."
+            alert.messageText = "🙈 WC PeekGuard"
+            alert.informativeText = "绿色泡泡 is covered after 15 seconds without interaction. Touch ID appears automatically when you return. Quit this app to turn protection off; open WC PeekGuard from Applications to turn it back on."
             alert.addButton(withTitle: "OK"); alert.runModal()
         }
     }
@@ -318,13 +318,13 @@ struct TargetWindow {
     func updateMenu() {
         statusItem.button?.title = "🙈"
         statusItem.button?.font = .systemFont(ofSize: 14)
-        statusItem.button?.toolTip = "WeChat Privacy · Auto-cover on · 15 seconds"
+        statusItem.button?.toolTip = "WC PeekGuard · Auto-cover on · 15 seconds"
         statusItem.button?.setAccessibilityLabel(statusItem.button?.toolTip)
         let menu = NSMenu()
-        menu.addItem(withTitle: "Cover WeChat now", action: #selector(lockNow), keyEquivalent: "")
-        menu.addItem(withTitle: session.covered ? "Show privacy cover…" : "About WeChat Privacy…", action: #selector(openCover), keyEquivalent: "")
+        menu.addItem(withTitle: "Cover 绿色泡泡 now", action: #selector(lockNow), keyEquivalent: "")
+        menu.addItem(withTitle: session.covered ? "Show privacy cover…" : "About WC PeekGuard…", action: #selector(openCover), keyEquivalent: "")
         menu.addItem(.separator())
-        menu.addItem(withTitle: "Quit WeChat Privacy…", action: #selector(quitHelper), keyEquivalent: "")
+        menu.addItem(withTitle: "Quit WC PeekGuard…", action: #selector(quitHelper), keyEquivalent: "")
         for item in menu.items { item.target = self }
         statusItem.menu = menu
     }

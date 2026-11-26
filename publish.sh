@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publishes WeChat Privacy to your GitHub account, end to end, in one command.
+# Publishes WC PeekGuard to your GitHub account, end to end, in one command.
 #
 #   ./publish.sh                  # repo name: wechat-privacy
 #   REPO_NAME=my-name ./publish.sh
@@ -14,10 +14,10 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-REPO_NAME="${REPO_NAME:-wechat-privacy}"
-VERSION="${VERSION:-1.0.0}"
-BUILD_NUMBER="${BUILD_NUMBER:-10}"
-DESCRIPTION="给 Mac 微信加一层隐私罩：静置 15 秒自动盖住，回来按 Touch ID 才让开。No screen recording, no permissions, no network."
+REPO_NAME="${REPO_NAME:-wc-peekguard}"
+VERSION="${VERSION:-1.1.0}"
+BUILD_NUMBER="${BUILD_NUMBER:-11}"
+DESCRIPTION="给绿色泡泡加一层隐私罩：静置 15 秒自动盖住，回来按 Touch ID 才让开。No screen recording, no permissions, no network."
 
 say()  { printf '\n\033[1m%s\033[0m\n' "$*"; }
 note() { printf '   %s\n' "$*"; }
@@ -72,7 +72,7 @@ grep -rn '__OWNER__' . --include='*.md' --include='*.sh' 2>/dev/null | head -3 |
 say "4/6  building"
 chmod +x build.sh install.sh
 ./build.sh "$VERSION" "$BUILD_NUMBER" >/dev/null
-note "built dist/WeChatPrivacy-$VERSION.zip"
+note "built dist/WCPeekGuard-$VERSION.zip"
 
 # ---------------------------------------------------------------- 5. commit
 say "5/6  creating the repository and pushing"
@@ -80,7 +80,7 @@ git rev-parse --git-dir >/dev/null 2>&1 || git init -q
 git config user.name "$OWNER"
 git config user.email "${OWNER}@users.noreply.github.com"
 git add -A
-git diff --cached --quiet || git commit -q -m "WeChat Privacy ${VERSION}: cover WeChat after 15s, reveal with Touch ID"
+git diff --cached --quiet || git commit -q -m "WC PeekGuard ${VERSION}: cover the green bubble after 15s, reveal with Touch ID"
 git branch -M main
 
 if "$GH" repo view "$OWNER/$REPO_NAME" >/dev/null 2>&1; then
@@ -96,17 +96,17 @@ git remote set-head origin -a >/dev/null 2>&1 || true
 # ---------------------------------------------------------------- 6. release
 say "6/6  publishing v$VERSION"
 if "$GH" release view "v$VERSION" >/dev/null 2>&1; then
-  "$GH" release upload "v$VERSION" "dist/WeChatPrivacy-$VERSION.zip" \
-    "dist/WeChatPrivacy.zip" --clobber
+  "$GH" release upload "v$VERSION" "dist/WCPeekGuard-$VERSION.zip" \
+    "dist/WCPeekGuard.zip" --clobber
 else
-  cp "dist/WeChatPrivacy-$VERSION.zip" dist/WeChatPrivacy.zip
+  cp "dist/WCPeekGuard-$VERSION.zip" dist/WCPeekGuard.zip
   "$GH" release create "v$VERSION" \
-    "dist/WeChatPrivacy.zip" \
+    "dist/WCPeekGuard.zip" \
     --title "v$VERSION" \
     --notes "首个公开版本。
 
-- 微信静置 15 秒自动盖住，回到微信自动弹 Touch ID
-- 切到别的 App 时把微信窗口一起收起，不在别人屏幕上留白板
+- 绿色泡泡静置 15 秒自动盖住，回来自动弹 Touch ID
+- 切到别的 App 时把绿色泡泡窗口一起收起，不在别人屏幕上留白板
 - 不申请屏幕录制 / 辅助功能 / 输入监控，不联网
 - 通用二进制（Apple 芯片 + Intel），macOS 14+"
 fi

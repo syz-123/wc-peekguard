@@ -36,7 +36,7 @@ jobs:
           ./build.sh "${{ steps.v.outputs.version }}" "${{ steps.v.outputs.build }}"
 
       - name: Use a stable asset name for the one-line installer
-        run: cp "dist/WeChatPrivacy-${{ steps.v.outputs.version }}.zip" dist/WeChatPrivacy.zip
+        run: cp "dist/WCPeekGuard-${{ steps.v.outputs.version }}.zip" dist/WCPeekGuard.zip
 
       - name: Publish release
         env:
@@ -45,10 +45,10 @@ jobs:
           TAG="v${{ steps.v.outputs.version }}"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             # The release may already exist (e.g. published from a local build).
-            gh release upload "$TAG" dist/WeChatPrivacy.zip --clobber --repo "$GITHUB_REPOSITORY"
+            gh release upload "$TAG" dist/WCPeekGuard.zip --clobber --repo "$GITHUB_REPOSITORY"
           else
             gh release create "$TAG" \
-              dist/WeChatPrivacy.zip \
+              dist/WCPeekGuard.zip \
               --repo "$GITHUB_REPOSITORY" \
               --title "$TAG" \
               --generate-notes

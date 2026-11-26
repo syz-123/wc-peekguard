@@ -8,7 +8,7 @@ struct MenuBar: View {
     var body: some View {
         HStack(spacing: 18) {
             Text("").font(.system(size: 15))
-            Text("WeChat").font(.system(size: 13, weight: .semibold))
+            Text("绿色泡泡").font(.system(size: 13, weight: .semibold))
             Text("文件").font(.system(size: 13))
             Text("编辑").font(.system(size: 13))
             Spacer()
