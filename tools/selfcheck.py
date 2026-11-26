@@ -120,9 +120,10 @@ section("3. 不该出现在公开仓库里的东西")
 STAGED = subprocess.run(
     ["git", "ls-files"], cwd=ROOT, capture_output=True, text=True
 ).stdout.split()
-# publish.sh is the tool that *performs* the substitution, so it legitimately contains the literal
+# The substitution tools themselves legitimately contain the literal.
+TOOLS = {"publish.sh", "tools/selfcheck.py"}
 leaks = [f for f in STAGED
-         if f != "publish.sh" and "__OWNER__" in (ROOT / f).read_text(errors="ignore")]
+         if f not in TOOLS and "__OWNER__" in (ROOT / f).read_text(errors="ignore")]
 check(not leaks, "没有残留的 __OWNER__ 占位符", f"占位符未替换：{leaks}")
 
 personal = []
@@ -153,7 +154,19 @@ for script, shell in [("build.sh", "zsh"), ("install.sh", "bash"), ("publish.sh"
     r = subprocess.run([shell, "-n", str(ROOT / script)], capture_output=True, text=True)
     check(r.returncode == 0, f"{script} 语法通过", f"{script} 语法错误：{r.stderr.strip()}")
 
+try:
+    import yaml  # noqa: F401
+    HAVE_YAML = True
+except ModuleNotFoundError:
+    HAVE_YAML = False
 for wf in sorted((ROOT / ".github/workflows").glob("*.yml")):
+    if not HAVE_YAML:
+        text = wf.read_text()
+        if "\t" in text:
+            bad(f"{wf.name} 含有制表符（YAML 不允许）")
+        else:
+            ok(f"{wf.name} 结构可用（环境无 PyYAML，跳过完整解析）")
+        continue
     try:
         import yaml
 
