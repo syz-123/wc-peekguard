@@ -34,13 +34,13 @@ jobs:
 
       - name: Propagate quarantine to the app (simulates Archive Utility)
         run: |
-          APP="/tmp/out/WC Peek Guard.app"
+          APP="/tmp/out/WC PeekGuard.app"
           xattr -w com.apple.quarantine "0083;$(printf '%x' "$(date +%s)");Safari;" "$APP"
           echo "quarantine on app:"; xattr -p com.apple.quarantine "$APP"
 
       - name: "VERDICT 1: Gatekeeper assessment with quarantine"
         run: |
-          APP="/tmp/out/WC Peek Guard.app"
+          APP="/tmp/out/WC PeekGuard.app"
           echo "--- spctl (this is the authoritative Gatekeeper decision) ---"
           spctl --assess --type execute --verbose=4 "$APP" 2>&1 || echo "exit=$?"
           echo
@@ -49,7 +49,7 @@ jobs:
 
       - name: Try to launch it while quarantined
         run: |
-          APP="/tmp/out/WC Peek Guard.app"
+          APP="/tmp/out/WC PeekGuard.app"
           echo "launching while quarantined..."
           open "$APP" 2>&1 || echo "open failed with exit=$?"
           sleep 3
@@ -62,7 +62,7 @@ jobs:
 
       - name: "VERDICT 2: same app after the installer strips quarantine"
         run: |
-          APP="/tmp/out/WC Peek Guard.app"
+          APP="/tmp/out/WC PeekGuard.app"
           xattr -dr com.apple.quarantine "$APP"
           echo "quarantine now:"; xattr -p com.apple.quarantine "$APP" 2>/dev/null || echo "(none)"
           echo "--- spctl still rejects? ---"
@@ -79,7 +79,7 @@ jobs:
 
       - name: Integrity after the round trip
         run: |
-          APP="/tmp/out/WC Peek Guard.app"
+          APP="/tmp/out/WC PeekGuard.app"
           codesign --verify --deep --strict "$APP" && echo "signature OK"
           "$APP/Contents/MacOS/WCPeekGuard" --self-test
           /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP/Contents/Info.plist"
