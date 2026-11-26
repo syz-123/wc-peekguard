@@ -178,7 +178,7 @@ curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.s
 目前写死 15 秒。克隆下来改 [`Sources/WCPeekGuard.swift:18`](Sources/WCPeekGuard.swift#L18) 里的 `>= 15`，再跑 `./build.sh`。做配置界面会引入偏好存储，暂时不想为这个破坏"删掉即干净"的性质。
 
 **会不会很占资源？**
-每 0.15 秒查一次窗口列表，CPU 占用基本为 0，常驻内存二十几 MB。不截屏、不轮询像素。
+每 0.15 秒查一次窗口列表，不截屏、不轮询像素。实测常驻内存约 13 MB（`footprint` 读数）。
 
 **重启之后还要手动打开吗？**
 要。它没有注册开机自启（故意的，避免在你不知情时常驻）。想让它开机就在，把它加到「系统设置 → 通用 → 登录项」。

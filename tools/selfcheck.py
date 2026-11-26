@@ -229,6 +229,37 @@ else:
         else:
             bad(f"{z.name} 里找不到 Info.plist")
 
+# ---------------------------------------------------------------- 7. drift
+section("7. 文档与实现是否同步（防止改了代码忘了改文档）")
+src = read("Sources/WCPeekGuard.swift")
+m = re.search(r"lastInteraction >= (\d+)", src)
+if m:
+    seconds = m.group(1)
+    for f in ["README.md", "docs/getting-started.md"]:
+        text = read(f)
+        check(
+            f"{seconds} 秒" in text,
+            f"{f} 里的时长与代码一致（{seconds} 秒）",
+            f"{f} 里找不到 '{seconds} 秒'，文档与代码的时长对不上了",
+        )
+
+if "不到七十行" in read("README.md"):
+    n = len(read("install.sh").splitlines())
+    check(n < 70, f"install.sh 确实不到七十行（{n} 行）", f"README 说不到七十行，实际 {n} 行")
+
+gitignore = read(".gitignore")
+check("dist/" in gitignore, ".gitignore 排除了 dist/", ".gitignore 没有排除 dist/，构建产物会被提交")
+
+license_text = read("LICENSE")
+check("MIT License" in license_text, "LICENSE 是 MIT", "LICENSE 内容不像 MIT")
+
+big = []
+for f in STAGED:
+    fp = ROOT / f
+    if fp.exists() and fp.stat().st_size > 2 * 1024 * 1024:
+        big.append(f"{f}({fp.stat().st_size // 1024}KB)")
+check(not big, "没有超过 2 MB 的已跟踪文件", f"这些文件偏大：{big}")
+
 # ---------------------------------------------------------------- report
 print()
 if failures:

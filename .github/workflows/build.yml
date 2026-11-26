@@ -17,3 +17,6 @@ jobs:
 
       - name: Consistency self-check
         run: python3 tools/selfcheck.py
+
+      - name: Installer fault injection
+        run: ./tools/faultcheck.sh

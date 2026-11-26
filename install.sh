@@ -52,7 +52,8 @@ ditto "$TMP/out/$APP_NAME" "$DEST" || fail "could not write to $DEST_DIR — che
 xattr -dr com.apple.quarantine "$DEST" 2>/dev/null || true
 
 say ":: launching"
-open "$DEST"
+# A failed `open` must not turn a successful install into a reported failure.
+open "$DEST" 2>/dev/null || say "   (installed, but could not launch it — open it from $DEST_DIR)"
 
 cat <<EOF
 
