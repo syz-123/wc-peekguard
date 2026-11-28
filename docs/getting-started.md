@@ -172,7 +172,7 @@ curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.s
 | 你看到的 | 大概是什么原因 | 怎么办 |
 | --- | --- | --- |
 | 终端卡住不动，超过 1 分钟 | 连不上 GitHub（国内常见） | 按 `Control + C` 停掉，改用方式二 |
-| 出现 `curl: (55)` 或 `(56)` | 代理只给浏览器走，没管终端 | 用浏览器下载 zip，然后：`bash /tmp/wcpeekguard.sh --from ~/Downloads/WCPeekGuard.zip`（详见 README 的"离线安装"） |
+| 出现 `curl: (55)` 或 `(56)` | 代理只给浏览器走，没管终端 | 用浏览器到 Releases 页面**同时下载 `WCPeekGuard.zip` 和 `install.sh`**，然后跑：`bash ~/Downloads/install.sh --from ~/Downloads/WCPeekGuard.zip` |
 | 提示 `command not found` | 复制时漏了字符或换行了 | 回到上面重新整行复制 |
 | 双击提示「已损坏，应移到废纸篓」 | 下载不完整 | 删掉，重新下载一次 |
 | 双击提示「无法验证开发者」 | **正常**，没有付费签名 | 右键 → 打开（方式二第 3 步） |

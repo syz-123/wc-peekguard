@@ -79,7 +79,7 @@ for f in ["install.sh", "README.md", "docs/getting-started.md"]:
 for f in ["README.md", "docs/getting-started.md", "install.sh"]:
     if not (ROOT / f).exists():
         continue
-    for hit in set(re.findall(r"[A-Za-z ]+\.app\b", read(f))):
+    for hit in set(re.findall(r"(?<![\w.])([A-Z][A-Za-z0-9]*(?: [A-Z][A-Za-z0-9]*)+\.app)", read(f))):
         hit = hit.strip()
         if hit.startswith("/"):  # absolute paths are constructed, skip
             continue
@@ -257,6 +257,16 @@ check("dist/" in gitignore, ".gitignore 排除了 dist/", ".gitignore 没有排�
 
 license_text = read("LICENSE")
 check("MIT License" in license_text, "LICENSE 是 MIT", "LICENSE 内容不像 MIT")
+
+# If the docs tell users to fetch install.sh from the Releases page, the release
+# job must actually upload it there. (It is easy to document a file nobody ships.)
+readme = read("README.md")
+if "同时下载两个文件" in readme:
+    check(
+        "dist/install.sh" in release_yml,
+        "文档让用户从 Releases 下载 install.sh，CI 也确实上传了它",
+        "README 让用户从 Releases 下载 install.sh，但 release.yml 没有上传它",
+    )
 
 big = []
 for f in STAGED:

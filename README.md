@@ -91,7 +91,7 @@ curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.s
 
 不需要 sudo、不需要密码、不需要装 Xcode，装完自动启动。
 
-它做的事就四件：**下载 → 解压 → 放进 `~/Applications` → 去掉 macOS 的隔离标记 → 打开。** 不放心可以先读 [install.sh](install.sh)，约 100 行，没有别的动作。
+它做的事就四件：**下载 → 解压 → 放进 `~/Applications` → 去掉 macOS 的隔离标记 → 打开。** 不放心可以先读 [install.sh](install.sh)，约 180 行，没有别的动作。
 
 ### 方式二：下载安装包（不想碰终端就走这条）
 
@@ -115,15 +115,25 @@ curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.s
 
 ### 离线安装（网络连不上 Release 时用这条）
 
-浏览器能打开 GitHub、但终端下载失败——这在代理只走规则模式时很常见。这时先下好包，再用本地文件安装：
+浏览器能打开 GitHub、但终端下载失败——这在"代理只走规则模式"时非常常见，因为安装包和脚本走的域名和网页不是同一个。
+
+1. 在浏览器打开 [Releases](https://github.com/syz-123/wc-peekguard/releases/latest)
+2. 从这个页面**同时下载两个文件**：`WCPeekGuard.zip` 和 `install.sh`
+3. 打开终端，跑这一行：
 
 ```bash
-# 1. 用浏览器从 Releases 页面下载 WCPeekGuard.zip，然后用下面两句
-curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.sh -o /tmp/wcpeekguard.sh
-bash /tmp/wcpeekguard.sh --from ~/Downloads/WCPeekGuard.zip
+bash ~/Downloads/install.sh --from ~/Downloads/WCPeekGuard.zip
 ```
 
-它会做和一行命令完全相同的事：验签、装进 `~/Applications`、去掉隔离标记、自动启动。因为你没走浏览器双击，也就完全绕开了 Gatekeeper 的拦截提示。
+如果 Safari 已经自动把 zip 解开了，直接指向那个 `.app` 也可以：
+
+```bash
+bash ~/Downloads/install.sh --from ~/Downloads/"WC PeekGuard.app"
+```
+
+它做的事和一行命令完全相同：验签、装进 `~/Applications`、去掉隔离标记、自动启动。因为你没走浏览器双击，也就完全绕开了 Gatekeeper 的拦截提示。
+
+> 如果连 Releases 页面都打不开，那就只剩"浏览器下载 + 右键打开"这一条路了，见上面的方式二。
 
 ### 完全没用过终端？
 
@@ -192,6 +202,12 @@ bash /tmp/wcpeekguard.sh --from ~/Downloads/WCPeekGuard.zip
 
 **会不会很占资源？**
 每 0.15 秒查一次窗口列表，不截屏、不轮询像素。实测常驻内存约 13 MB（`footprint` 读数）。
+
+**以后怎么升级？**
+把安装命令再跑一遍就行，会覆盖旧版本（先自动退出正在运行的那个）。不用先卸载。
+
+**电脑上没装绿色泡泡会怎样？**
+菜单栏照样有 🙈，但它什么都不会做——它只对那一个应用生效。装上之后不用做任何设置。
 
 **重启之后还要手动打开吗？**
 要。它没有注册开机自启（故意的，避免在你不知情时常驻）。想让它开机就在，把它加到「系统设置 → 通用 → 登录项」。

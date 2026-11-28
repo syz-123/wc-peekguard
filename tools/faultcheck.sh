@@ -123,6 +123,52 @@ else
   PASS=$((PASS + 1)); printf '  \033[32m✓\033[0m %-34s %s\n' "--from 文件不存在应失败" "rejected"
 fi
 
+# --from 直接给 .app（Safari 会自动解压 zip，用户手上可能没有 zip）
+rm -rf "$WORK/home"; mkdir -p "$WORK/home" "$WORK/plain"
+ditto -x -k "$WORK/good.zip" "$WORK/plain"
+if HOME="$WORK/home" PATH="$WORK/stub:/usr/bin:/bin:/usr/sbin:/sbin" \
+   bash install.sh --from "$WORK/plain/WC PeekGuard.app" > /dev/null 2>&1 \
+   && [[ -d "$WORK/home/Applications/WC PeekGuard.app" ]]; then
+  PASS=$((PASS + 1)); printf '  \033[32m✓\033[0m %-34s %s\n' "--from 已解压的 .app" "ok"
+else
+  FAIL=$((FAIL + 1)); printf '  \033[31m✗\033[0m %-34s %s\n' "--from 已解压的 .app" "failed"
+fi
+
+# --from 给了一个不是 .app 的目录
+if HOME="$WORK/home" PATH="$WORK/stub:/usr/bin:/bin:/usr/sbin:/sbin" \
+   bash install.sh --from "$WORK/plain" > /dev/null 2>&1; then
+  FAIL=$((FAIL + 1)); printf '  \033[31m✗\033[0m %-34s %s\n' "--from 普通目录应拒绝" "exited 0"
+else
+  PASS=$((PASS + 1)); printf '  \033[32m✓\033[0m %-34s %s\n' "--from 普通目录应拒绝" "rejected"
+fi
+
+# 直连失败 + 系统代理也不通：必须失败且不残留，并给出浏览器方案
+mkdir -p "$WORK/proxied"
+for t in open killall curl ditto unzip mktemp rm mkdir cut cat grep sed codesign awk head truncate; do
+  p="$(command -v $t 2>/dev/null)" && ln -sf "$p" "$WORK/proxied/$t"
+done
+cat > "$WORK/proxied/scutil" <<'STUB'
+#!/bin/bash
+cat <<OUT
+  HTTPSEnable : 1
+  HTTPSProxy : 127.0.0.1
+  HTTPSPort : 9
+OUT
+STUB
+chmod +x "$WORK/proxied/scutil"
+# Point at an address that always refuses, so the direct attempt is guaranteed to fail.
+sed "s|^URL=.*|URL=\"http://127.0.0.1:9/WCPeekGuard.zip\"|" install.sh > "$WORK/t.sh"
+rm -rf "$WORK/home"; mkdir -p "$WORK/home"
+HOME="$WORK/home" PATH="$WORK/proxied:/usr/bin:/bin:/usr/sbin:/sbin" \
+  bash "$WORK/t.sh" > "$WORK/out.txt" 2>&1
+rc=$?
+if [[ $rc -ne 0 ]] && grep -q "system proxy" "$WORK/out.txt" && [[ ! -e "$WORK/home/Applications" ]]; then
+  PASS=$((PASS + 1)); printf '  \033[32m✓\033[0m %-34s %s\n' "直连失败→走系统代理→仍失败" "干净失败"
+else
+  FAIL=$((FAIL + 1)); printf '  \033[31m✗\033[0m %-34s exit=%s\n' "直连失败→走系统代理→仍失败" "$rc"
+  tail -4 "$WORK/out.txt" | sed 's/^/      /'
+fi
+
 echo
 echo "== 构建脚本 =="
 # Build a throwaway copy: a full build must not clobber the real dist/ artifact.
