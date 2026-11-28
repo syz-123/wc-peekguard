@@ -91,7 +91,7 @@ curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.s
 
 不需要 sudo、不需要密码、不需要装 Xcode，装完自动启动。
 
-它做的事就四件：**下载 → 解压 → 放进 `~/Applications` → 去掉 macOS 的隔离标记 → 打开。** 不放心可以先读 [install.sh](install.sh)，不到七十行，没有别的动作。
+它做的事就四件：**下载 → 解压 → 放进 `~/Applications` → 去掉 macOS 的隔离标记 → 打开。** 不放心可以先读 [install.sh](install.sh)，约 100 行，没有别的动作。
 
 ### 方式二：下载安装包（不想碰终端就走这条）
 
@@ -108,9 +108,22 @@ curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.s
 | 你看到的 | 怎么办 |
 | --- | --- |
 | 终端卡住不动超过 1 分钟 | 连不上 GitHub，按 `Control + C` 停掉，改用方式二 |
+| `curl: (55)` / `curl: (56)` 下载失败 | 浏览器的代理常和终端不一致。用浏览器下载 zip，再走下面的"离线安装" |
 | 提示 `command not found` | 复制时漏了字符，重新整行复制 |
 | 双击提示"已损坏" | 下载不完整，删掉重新下载 |
 | 右键菜单里「打开」是灰的 | 公司电脑的安全策略，这台机器装不了 |
+
+### 离线安装（网络连不上 Release 时用这条）
+
+浏览器能打开 GitHub、但终端下载失败——这在代理只走规则模式时很常见。这时先下好包，再用本地文件安装：
+
+```bash
+# 1. 用浏览器从 Releases 页面下载 WCPeekGuard.zip，然后用下面两句
+curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.sh -o /tmp/wcpeekguard.sh
+bash /tmp/wcpeekguard.sh --from ~/Downloads/WCPeekGuard.zip
+```
+
+它会做和一行命令完全相同的事：验签、装进 `~/Applications`、去掉隔离标记、自动启动。因为你没走浏览器双击，也就完全绕开了 Gatekeeper 的拦截提示。
 
 ### 完全没用过终端？
 

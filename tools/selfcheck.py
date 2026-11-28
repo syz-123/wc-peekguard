@@ -243,9 +243,14 @@ if m:
             f"{f} 里找不到 '{seconds} 秒'，文档与代码的时长对不上了",
         )
 
-if "不到七十行" in read("README.md"):
-    n = len(read("install.sh").splitlines())
-    check(n < 70, f"install.sh 确实不到七十行（{n} 行）", f"README 说不到七十行，实际 {n} 行")
+m = re.search(r"约 (\d+) 行", read("README.md"))
+if m:
+    claimed, actual = int(m.group(1)), len(read("install.sh").splitlines())
+    check(
+        abs(actual - claimed) <= 15,
+        f"README 说的 {claimed} 行与实际的 {actual} 行相符",
+        f"README 说 install.sh 约 {claimed} 行，实际 {actual} 行",
+    )
 
 gitignore = read(".gitignore")
 check("dist/" in gitignore, ".gitignore 排除了 dist/", ".gitignore 没有排除 dist/，构建产物会被提交")

@@ -106,6 +106,24 @@ else
 fi
 
 echo
+echo "== 离线安装模式（--from）=="
+rm -rf "$WORK/home"; mkdir -p "$WORK/home"
+if HOME="$WORK/home" PATH="$WORK/stub:/usr/bin:/bin:/usr/sbin:/sbin" \
+   bash install.sh --from "$WORK/good.zip" > /dev/null 2>&1 \
+   && [[ -d "$WORK/home/Applications/WC PeekGuard.app" ]]; then
+  PASS=$((PASS + 1)); printf '  \033[32m✓\033[0m %-34s %s\n' "--from 本地 zip" "ok"
+else
+  FAIL=$((FAIL + 1)); printf '  \033[31m✗\033[0m %-34s %s\n' "--from 本地 zip" "failed"
+fi
+
+if HOME="$WORK/home" PATH="$WORK/stub:/usr/bin:/bin:/usr/sbin:/sbin" \
+   bash install.sh --from "$WORK/no-such-file.zip" > /dev/null 2>&1; then
+  FAIL=$((FAIL + 1)); printf '  \033[31m✗\033[0m %-34s %s\n' "--from 文件不存在应失败" "exited 0"
+else
+  PASS=$((PASS + 1)); printf '  \033[32m✓\033[0m %-34s %s\n' "--from 文件不存在应失败" "rejected"
+fi
+
+echo
 echo "== 构建脚本 =="
 if (cd /tmp && "$OLDPWD/build.sh" 0.0.0 0 >/dev/null 2>&1); then
   PASS=$((PASS + 1)); printf '  \033[32m✓\033[0m %-34s %s\n' "从任意目录调用 build.sh" "ok"

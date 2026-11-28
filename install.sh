@@ -3,6 +3,12 @@
 #
 #   curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.sh | bash
 #
+# Or, when the network cannot reach the release CDN, download the zip in a
+# browser and install from the local file:
+#
+#   curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.sh -o /tmp/wcpeekguard.sh
+#   bash /tmp/wcpeekguard.sh --from ~/Downloads/WCPeekGuard.zip
+#
 # Installs to ~/Applications, strips the quarantine flag so Gatekeeper does not
 # block the (ad-hoc signed, not notarised) build, then launches it.
 set -euo pipefail
@@ -16,23 +22,52 @@ URL="https://github.com/$REPO/releases/latest/download/WCPeekGuard.zip"
 say() { printf '%s\n' "$*"; }
 fail() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
+FROM=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --from) FROM="${2:-}"; [[ -n "$FROM" ]] || fail "--from needs a path"; shift 2 ;;
+    -h|--help) say "usage: install.sh [--from /path/to/WCPeekGuard.zip]"; exit 0 ;;
+    *) fail "unknown option: $1" ;;
+  esac
+done
+
 [[ "$(uname -s)" == "Darwin" ]] || fail "this installer only supports macOS"
 
 if [[ "$(sw_vers -productVersion | cut -d. -f1)" -lt 14 ]]; then
   fail "WC PeekGuard needs macOS 14 or newer (you have $(sw_vers -productVersion))"
 fi
 
-say ":: downloading the latest release"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-# Timeouts matter: without them a blocked connection hangs silently for minutes.
-curl -fsSL --connect-timeout 15 --max-time 300 --retry 2 --retry-delay 2 \
-  "$URL" -o "$TMP/WCPeekGuard.zip" \
-  || fail "download failed. If this network cannot reach GitHub, download WCPeekGuard.zip
-  from https://github.com/$REPO/releases and install it by hand."
+
+if [[ -n "$FROM" ]]; then
+  [[ -f "$FROM" ]] || fail "no such file: $FROM"
+  say ":: installing from local file: $FROM"
+  SRC_ZIP="$FROM"
+else
+  say ":: downloading the latest release"
+  # Timeouts matter: without them a blocked connection hangs silently for minutes.
+  # --retry-all-errors also retries transfer errors (55/56), not just timeouts.
+  SRC_ZIP="$TMP/WCPeekGuard.zip"
+  curl -fsSL --connect-timeout 15 --max-time 300 \
+    --retry 5 --retry-delay 2 --retry-all-errors \
+    "$URL" -o "$SRC_ZIP" 2>"$TMP/curl.err" || {
+      sed 's/^/  /' "$TMP/curl.err" >&2 || true
+      fail "download failed.
+
+  GitHub's release download host is often unreachable even when github.com
+  loads in your browser (common with rule-based VPNs). This works every time:
+
+    1. open https://github.com/$REPO/releases
+    2. download WCPeekGuard.zip with your browser
+    3. then run:
+         curl -fsSL https://raw.githubusercontent.com/$REPO/main/install.sh -o /tmp/wcpeekguard.sh
+         bash /tmp/wcpeekguard.sh --from ~/Downloads/WCPeekGuard.zip"
+    }
+fi
 
 say ":: unpacking"
-ditto -x -k "$TMP/WCPeekGuard.zip" "$TMP/out" || fail "could not unpack the archive"
+ditto -x -k "$SRC_ZIP" "$TMP/out" || fail "could not unpack the archive"
 [[ -d "$TMP/out/$APP_NAME" ]] || fail "archive layout looks wrong, aborting"
 
 # Verify before touching the destination: never install a bundle we cannot validate.
