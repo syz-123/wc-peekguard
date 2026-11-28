@@ -189,6 +189,8 @@ curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.s
 
 **彻底删除**：上面退出之后，把「应用程序」里的 `WC PeekGuard.app` 拖进废纸篓。就完了。
 
+（如果以后想用命令行删，`killall WCPeekGuard` 提示 `No matching process` 是正常的——说明它本来就没在运行。）
+
 它**不写任何配置文件、不装开机自启、不在系统里留东西**，删掉就是干净删掉。
 
 ---

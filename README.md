@@ -20,6 +20,9 @@
 </div>
 
 > **English** — A ~400-line macOS menu-bar helper for the green-bubble chat app. Leave your Mac for 15 seconds and your chat windows get covered; come back and Touch ID reveals them. It draws a panel over the windows instead of touching the app itself: no injection, no screen recording, no accessibility access, no network. Free, MIT, macOS 14+ (Apple Silicon & Intel).
+>
+> **Install** — `curl -fsSL https://raw.githubusercontent.com/syz-123/wc-peekguard/main/install.sh | bash`
+> If that download fails (common behind a rule-based VPN), grab both `WCPeekGuard.zip` and `install.sh` from [Releases](https://github.com/syz-123/wc-peekguard/releases/latest) and run `bash ~/Downloads/install.sh --from ~/Downloads/WCPeekGuard.zip`. No terminal at all: unzip, drag to Applications, right-click → Open.
 
 ---
 
@@ -218,6 +221,8 @@ bash ~/Downloads/install.sh --from ~/Downloads/"WC PeekGuard.app"
 killall WCPeekGuard
 rm -rf ~/Applications/"WC PeekGuard.app"
 ```
+
+第一行如果提示 `No matching process`，说明它本来就没在运行，直接跑第二行就行，不是出错。
 
 它不写任何配置文件，删掉就是干净删掉。
 
