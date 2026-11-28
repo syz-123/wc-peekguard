@@ -125,7 +125,9 @@ fi
 
 echo
 echo "== 构建脚本 =="
-if (cd /tmp && "$OLDPWD/build.sh" 0.0.0 0 >/dev/null 2>&1); then
+# Build a throwaway copy: a full build must not clobber the real dist/ artifact.
+cp -R Sources tools build.sh make-icon.swift "$WORK/src" 2>/dev/null || { mkdir -p "$WORK/src"; cp -R Sources tools build.sh "$WORK/src"/; }
+if (cd / && "$WORK/src/build.sh" 0.0.0 0 >/dev/null 2>&1) && [[ -d "$WORK/src/dist" ]]; then
   PASS=$((PASS + 1)); printf '  \033[32m✓\033[0m %-34s %s\n' "从任意目录调用 build.sh" "ok"
 else
   FAIL=$((FAIL + 1)); printf '  \033[31m✗\033[0m %-34s %s\n' "从任意目录调用 build.sh" "failed"
